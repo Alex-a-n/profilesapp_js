@@ -1,4 +1,4 @@
-import type { Handler } from 'aws-lambda';
+import type { APIGatewayProxyHandler } from 'aws-lambda';
 import { Client } from 'pg';
 
 const DB_PARAMS = {
@@ -10,16 +10,33 @@ const DB_PARAMS = {
     ssl: true
 };
 
-export const handler: Handler = async (event) => {
+export const handler: APIGatewayProxyHandler = async (event) => {
+    console.log("event", event);
     const client = new Client(DB_PARAMS);
 
     try {
         await client.connect();
-        const result = await client.query("SELECT title, summary FROM books;");
+        const result = await client.query(
+            "SELECT\n" +
+            "    b.id AS book_id,\n" +
+            "    b.title,\n" +
+            "    b.summary,\n" +
+            "    a.name AS author,\n" +
+            "    f.url AS image_url\n" +
+            "  FROM books b\n" +
+            "  LEFT JOIN book_authors ba ON b.id = ba.book_id\n" +
+            "  LEFT JOIN authors a ON ba.author_id = a.id\n" +
+            "  LEFT JOIN formats f ON b.id = f.book_id\n" +
+            "  WHERE f.format_type LIKE 'image/%'");
+
         await client.end();
 
         return {
             statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*'
+            },
             body: JSON.stringify(result.rows),
         };
     } catch (error) {

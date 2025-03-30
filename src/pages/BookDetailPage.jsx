@@ -1,7 +1,10 @@
 // src/pages/BookDetailPage.jsx
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 // import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { get } from 'aws-amplify/api';
+import { fetchBooks } from '../hooks/fetchBooks'
+
 
 function BookDetailPage() {
     const { t } = useTranslation();
@@ -9,6 +12,44 @@ function BookDetailPage() {
 
     // 模拟获取书籍详情
     // 真实项目中可用 useEffect + API fetch
+
+    /*const [titles, setTitles] = useState([]);
+    const [summaries, setSummaries] = useState([]);
+
+    async function getItem() {
+        try {
+            const restOperation = get({
+                apiName: 'myRestApi',
+                path: 'books'
+            });
+            const response = await restOperation.response;
+            const { body } = await restOperation.response;
+            const books = await body.json();
+            console.log('response = ', books);
+            console.log('response = ', books.type);
+
+            // 分别提取字段
+            const titleList = books.map(book => book.title);
+            const summaryList = books.map(book => book.summary);
+
+
+            setTitles(titleList);
+            setSummaries(summaryList);
+
+            console.log('GET call succeeded: ', response);
+        } catch (error) {
+            console.log('GET call failed: ', error);
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            await getItem();
+        })();
+    }, []);*/
+    const { titles, summaries, images} = fetchBooks();
+
+
     const bookDetail = {
         title: 'Old Objects',
         author: 'John Smith',
@@ -27,11 +68,11 @@ function BookDetailPage() {
 
     return (
         <div style={{ padding: '20px' }}>
-            <h2>{bookDetail.title}</h2>
+            <h2>{titles[1]}</h2>
             <div style={{ display: 'flex', marginTop: '20px' }}>
                 {/* Left: Cover */}
                 <div style={{ marginRight: '30px' }}>
-                    <img src={bookDetail.cover} alt={bookDetail.title} style={{ width: '160px', height: '220px', border: '1px solid #ccc' }} />
+                    <img src={bookDetail.cover} alt={titles[0]} style={{ width: '160px', height: '220px', border: '1px solid #ccc' }} />
                 </div>
 
                 {/* Right: Info */}
@@ -52,7 +93,7 @@ function BookDetailPage() {
             <div style={{ marginTop: '30px' }}>
                 <h3>{t('detailPage.summary')}:</h3>
                 <p style={{ whiteSpace: 'pre-line' }}>
-                    {bookDetail.summary}
+                    {summaries[1]}
                 </p>
             </div>
         </div>

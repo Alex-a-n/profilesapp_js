@@ -1,11 +1,24 @@
 // src/pages/HomePage.jsx
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import {get} from "aws-amplify/api";
+import {fetchBooks} from "../hooks/fetchBooks.jsx";
 
 function HomePage() {
     const { t } = useTranslation();
     const navigate = useNavigate();
+
+    const { titles, summaries, images} = fetchBooks()
+
+    const newBookData = titles.slice(0, 10).map((title, index) => ({
+        id: index + 1,
+        title,
+        summary: summaries[index],
+        cover: images[index],
+        cat: 'literature', // 默认分类，你可以根据需要替换
+    }));
+    console.log('response = ', newBookData);
 
     // ---------- 新书速递 ----------
     const catLinks = [
@@ -20,7 +33,7 @@ function HomePage() {
         { key: 'comics', label: t('homePage.categoryComics') },
     ];
     const [selectedCat, setSelectedCat] = useState('all');
-    const newBookData = [
+    /*const newBookData = [
         { id: 1, title: 'Book1', cover: 'https://via.placeholder.com/120x160?text=Book1', cat: 'literature' },
         { id: 2, title: 'Book2', cover: 'https://via.placeholder.com/120x160?text=Book2', cat: 'fiction' },
         { id: 3, title: 'Book3', cover: 'https://via.placeholder.com/120x160?text=Book3', cat: 'fiction' },
@@ -31,7 +44,7 @@ function HomePage() {
         { id: 8, title: 'Book8', cover: 'https://via.placeholder.com/120x160?text=Book8', cat: 'comics' },
         { id: 9, title: 'Book9', cover: 'https://via.placeholder.com/120x160?text=Book9', cat: 'history' },
         { id: 10, title: 'Book10', cover: 'https://via.placeholder.com/120x160?text=Book10', cat: 'literature' },
-    ];
+    ];*/
     const filteredBooks = selectedCat === 'all'
         ? newBookData
         : newBookData.filter(b => b.cat === selectedCat);
